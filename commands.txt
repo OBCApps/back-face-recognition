@@ -2,3 +2,4 @@ virtualenv venv
 source venv/bin/activate
 pip install face-recognition
 pip install opencv-contrib-python
+hola
