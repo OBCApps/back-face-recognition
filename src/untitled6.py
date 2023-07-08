@@ -3,7 +3,6 @@ import numpy as np
 import heapq
 import base64
 import os
-
 current_dir = os.path.dirname(os.path.abspath(__file__))
 directory_dataset = os.path.join(current_dir, "dataset", "images_local1")
 directory_input = os.path.join(current_dir, "input")

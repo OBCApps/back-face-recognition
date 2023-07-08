@@ -8,6 +8,8 @@ from face_reconition import characterist_all_images_dir ,  characterist_image
 directory_dataset = "dataset/images_local1/"
 directory_imput = "input/"
 
+
+
 def crear_indice_rtree(directorio_raiz):
     caracteristicas_coleccion = characterist_all_images_dir(directorio_raiz)
 
