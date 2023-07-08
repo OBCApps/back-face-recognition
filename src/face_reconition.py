@@ -1,6 +1,11 @@
 import face_recognition as fr
 import os
 from sklearn.decomposition import PCA
+import base64
+from PIL import Image
+import io
+import numpy as np
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -19,6 +24,17 @@ def characterist_image(imagen_path):
         return caracteristicas[0]    
     # No hay rostros
     return None
+
+def convert_base64TOImage(imagen_base64):
+    imagen_decodificada = base64.b64decode(imagen_base64)
+    imagen_pil = Image.open(io.BytesIO(imagen_decodificada))
+    imagen_np = np.array(imagen_pil)
+    caracteristicas = fr.face_encodings(imagen_np)
+    if len(caracteristicas) > 0: # Es rostro
+        return caracteristicas[0]    
+    # No hay rostros
+    return None
+
 
 def characterist_all_images_dir(dataset):
     vector_characterist = {}

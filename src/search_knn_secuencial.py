@@ -58,11 +58,16 @@ def return_images(lista_imagenes):
     for nombre, indice in lista_imagenes:
         nombre_persona = nombre
         indice_str = str(indice)
-        direccion_imagen = os.path.join("src", "dataset", "images_local1", nombre_persona , f"{nombre_persona}_{indice_str}.jpg")
-        print("direccion_imagen: ",direccion_imagen )
+        direccion_imagen = os.path.join("src", "dataset", "images_local1", nombre_persona, f"{nombre_persona}_{indice_str}.jpg")
+        
         imagen_base64 = return_image(direccion_imagen)
-        imagenes_base64.append(imagen_base64)
+        imagen_dict = {
+            "nombre": nombre_persona,
+            "imagen": imagen_base64
+        }
+        imagenes_base64.append(imagen_dict)
     return imagenes_base64
+
 
 
 

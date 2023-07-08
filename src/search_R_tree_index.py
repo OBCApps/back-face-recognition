@@ -23,7 +23,7 @@ def buscar_indice(idx, query):
         name, index_image, caracteristicas = resultado.object
         index_str = str(index_image).zfill(4)  
         
-        k_elementos_cercanos.append((name ,index_str ))
+        k_elementos_cercanos.append((name, index_str))
     return k_elementos_cercanos
 
 
@@ -43,11 +43,13 @@ def buscar_knn_rtree(idx, query, k):
 def search_rtree_indexed_all(query, data, radio):
     idx = crear_indice(data)
     coordenadas = (query[0] - radio, query[1] - radio, query[0] + radio, query[1] + radio)
-    resultados  = buscar_indice(idx, coordenadas)
+    resultados = buscar_indice(idx, coordenadas)
     return return_images(resultados)
 
 def search_rtree_indexed_knn(query, data, radio, k):
     idx = crear_indice(data)
     coordenadas = (query[0] - radio, query[1] - radio, query[0] + radio, query[1] + radio)
-    resultados  = buscar_indice(idx, coordenadas)
+    resultados = buscar_knn_rtree(idx, coordenadas, k)
     return return_images(resultados)
+
+
