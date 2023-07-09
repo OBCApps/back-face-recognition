@@ -5,7 +5,7 @@ import os
 import time
 from src.search_knn_secuencial import knn_secuencial_rango, knn_secuencial_pq ,return_images
 from src.face_reconition import characterist_image, read_characteristics, convert_base64TOImage
-from src.search_R_tree_index import search_rtree_indexed_all, search_rtree_indexed_knn
+from src.search_R_tree_index import search_rtree_indexed_all, search_rtree_indexed_knn, search_rtree_indexed_knn_hight
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -72,6 +72,7 @@ def read_root(request_body: dict):
 
 @app.post("/search-secuencial-range")
 def read_root1(request_body: dict):
+    start_time = time.time()  
     try:
         imagen_base64 = request_body.get("imagen")
         radio = request_body.get("radio")
@@ -87,10 +88,11 @@ def read_root1(request_body: dict):
         data = read_characteristics(directory_dataset)
         k = cantidad
         finds = knn_secuencial_rango(query, data, radio, k)
-        
+        execution_time = time.time() - start_time 
         result = {
             "success": True,
-            "data": return_images(finds)
+            "data": return_images(finds),
+            "execution_time": execution_time,
         }
         return result
     except ValueError as e:
@@ -109,51 +111,41 @@ def read_root1(request_body: dict):
 
 @app.post("/search-rtree-index-all")
 def read_root2(request_body: dict):
-    try:
-        imagen_base64 = request_body.get("imagen")
-        radio = request_body.get("radio")
-        cantidad = request_body.get("cantidad")
-        
-        if imagen_base64 is None or radio is None or cantidad is None:
-            raise ValueError("Parámetros 'imagen', 'radio' y 'cantidad' requeridos en el cuerpo de la solicitud.")
-        
-        query = convert_base64TOImage(imagen_base64)
-        if query is None:
-            raise ValueError("No se pudo convertir la imagen a base64.")
-        
-        data = read_characteristics(directory_dataset)
-        k = cantidad
-        finds = search_rtree_indexed_all(query, data, radio)
-        
-        result = {
-            "success": True,
-            "data": finds
-        }
-        return result
-    except ValueError as e:
-        result = {
-            "success": False,
-            "error_message": str(e)
-        }
-        return result
-    except Exception as e:
-        result = {
-            "success": False,
-            "error_message": str(e)
-        }
-        return result
+    start_time = time.time()  
+   
+    print("ENTRO")
+    imagen_base64 = request_body.get("imagen")
+    radio = request_body.get("radio")
+    cantidad = request_body.get("cantidad")
+
+    
+    query = convert_base64TOImage(imagen_base64)
+    
+    
+    data = read_characteristics(directory_dataset)
+    print("DATA")
+    k = cantidad
+    print("ANTES")
+    EXCE, finds = search_rtree_indexed_all(query, data) # SOlo necesita query, indices, data
+    execution_time = time.time() - start_time  
+    result = {
+        "success": True,
+        "data": finds, 
+        "execution_time": EXCE
+    }
+    return result
+    
 
 
 
 @app.post("/search-rtree-index-knn")
 def read_root3(request_body: dict):
+    start_time = time.time() 
     try:
         imagen_base64 = request_body.get("imagen")
-        radio = request_body.get("radio")
+       
         cantidad = request_body.get("cantidad")
         
-        if imagen_base64 is None or radio is None or cantidad is None:
-            raise ValueError("Parámetros 'imagen', 'radio' y 'cantidad' requeridos en el cuerpo de la solicitud.")
         
         query = convert_base64TOImage(imagen_base64)
         if query is None:
@@ -161,11 +153,13 @@ def read_root3(request_body: dict):
         
         data = read_characteristics(directory_dataset)
         k = cantidad
-        finds = search_rtree_indexed_knn(query, data, radio, k)
-        
+        EXCE , finds = search_rtree_indexed_knn(query, data , k)
+        execution_time = time.time() - start_time  
+
         result = {
             "success": True,
-            "data": finds
+            "data": finds, 
+            "execution_time": EXCE,
         }
         return result
     except ValueError as e:
@@ -182,17 +176,73 @@ def read_root3(request_body: dict):
         return result
 
 
-# @app.get("/search-knn-hight")
-# def read_root4():    
-#     query = characterist_image(directory_input + '\\uno1.JPG')
-#     data = read_characteristics(directory_dataset)
-#     k = 4
-#     componentes_principales = apply_pca(data, 10)
+@app.get("/search-knn-hight")
+def read_root4(request_body: dict):
+    start_time = time.time()  
    
-#     #finds = knn_secuencial_pq(query, data, k)
-#     return componentes_principales 
+    print("ENTRO")
+    imagen_base64 = request_body.get("imagen")
+    radio = request_body.get("radio")
+    cantidad = request_body.get("cantidad")
+
+    
+    query = convert_base64TOImage(imagen_base64)
+    
+    
+    data = read_characteristics(directory_dataset)
+    print("DATA")
+    k = cantidad
+    print("ANTES")
+    EXCE, finds = search_rtree_indexed_knn_hight(query, data, cantidad) # SOlo necesita query, indices, data
+    execution_time = time.time() - start_time  
+    result = {
+        "success": True,
+        "data": finds, 
+        "execution_time": EXCE
+    }
+    return result
+    
 
 
+# @app.post("/search-rtree-index-all")
+# def read_root2(request_body: dict):
+#     start_time = time.time()
+#     error_messages = []  # Lista para almacenar los mensajes de error
+    
+#     try:
+#         print("ENTRO")
+#         imagen_base64 = request_body.get("imagen")
+#         radio = request_body.get("radio")
+#         cantidad = request_body.get("cantidad")
+        
+#         if imagen_base64 is None or radio is None or cantidad is None:
+#             error_messages.append("Parámetros 'imagen', 'radio' y 'cantidad' requeridos en el cuerpo de la solicitud.")
+        
+#         query = convert_base64TOImage(imagen_base64)
+#         print("QUERY")
+#         if query is None:
+#             error_messages.append("No se pudo convertir la imagen a base64.")
+        
+#         data = read_characteristics(directory_dataset)
+#         print("DATA")
+#         k = cantidad
+#         print("ANTES")
+#         finds = search_rtree_indexed_all(query, data, radio)
+#         execution_time = time.time() - start_time  
+#         result = {
+#             "success": True,
+#             "data": finds, 
+#             "execution_time": execution_time,
+#             "error_messages": error_messages  # Agregar la lista de mensajes de error al resultado
+#         }
+#         return result
+#     except Exception as e:
+#         error_messages.append(str(e))
+#         result = {
+#             "success": False,
+#             "error_messages": error_messages  # Agregar la lista de mensajes de error al resultado
+#         }
+#         return result
 
 
 if __name__ == "__main__":

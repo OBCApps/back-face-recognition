@@ -12,6 +12,7 @@ directory_input = os.path.join(current_dir, "input")
 # print(f"SEarchSecuencial: directory_dataset = {directory_dataset}" )
 # print(f"SEarchSecuencial: directory_input = {directory_input}" )
 
+
 def knn_secuencial_pq(query, data, k):
     pq = []
     
@@ -19,12 +20,14 @@ def knn_secuencial_pq(query, data, k):
         for i, caracteristicas in enumerate(caracteristicas_persona, start=1):  # Índices comienzan desde 1
             distancia = np.linalg.norm(query - caracteristicas)
             indice_str = str(i).zfill(4)  # Agregar ceros a la izquierda
-            heapq.heappush(pq, (distancia, nombre_persona, indice_str))
+            heapq.heappush(pq, (-distancia, nombre_persona, indice_str))  # Usar distancia negativa para obtener los valores más cercanos
+            
             if len(pq) > k:
                 heapq.heappop(pq)
     
-    vecinos_cercanos = [(nombre_persona, indice) for _, nombre_persona, indice in pq]     
+    vecinos_cercanos = [(nombre_persona, indice) for _, nombre_persona, indice in pq]
     vecinos_cercanos.sort()
+    
     return vecinos_cercanos
 
 
@@ -54,6 +57,7 @@ def return_image(direccion_imagen):
     return imagen_base64
 
 def return_images(lista_imagenes):
+    print(f"LISTA IMAGENES: {lista_imagenes}")
     imagenes_base64 = []
     for nombre, indice in lista_imagenes:
         nombre_persona = nombre

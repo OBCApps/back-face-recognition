@@ -54,9 +54,11 @@ def characterist_all_images_dir(dataset):
     return vector_characterist
 
 def save_characteristics(caracteristicas, archivo_salida):
+    
     with open(archivo_salida, "w") as file:
         for indice, (nombre_persona, caracteristicas_persona) in enumerate(caracteristicas.items(), start=1):
             nombre_persona_indice = f"{nombre_persona}_{str(indice).zfill(4)}"
+            print(f"SAve: {nombre_persona_indice }")
             for caracteristica in caracteristicas_persona:
                 file.write(nombre_persona_indice + ", " + ", ".join(str(x) for x in caracteristica) + "\n")
 
@@ -64,8 +66,10 @@ def save_characteristics(caracteristicas, archivo_salida):
 
 def read_characteristics(file_path):
     vector_characterist = {}
+    cont = 0;
     with open(file_path, "r") as file:
         for line in file:
+            cont+=1
             line = line.strip()
             if line:
                 parts = line.split(", ")
@@ -76,7 +80,7 @@ def read_characteristics(file_path):
 
                 if nombre_persona not in vector_characterist:
                     vector_characterist[nombre_persona] = []
-
+                
                 vector_characterist[nombre_persona].append(caracteristicas)
     ##print(vector_characterist)
     return vector_characterist
@@ -84,7 +88,7 @@ def read_characteristics(file_path):
 
 
 
-
+# DESCOMENTAR PARA INDEXAR LAS IMAGENES
 #dataset_local = characterist_all_images_dir(dataset_local)
 #save_characteristics(dataset_local, output )
 #read_characteristics("index")

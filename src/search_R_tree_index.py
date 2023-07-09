@@ -1,18 +1,36 @@
 from rtree import index
 import os
 from src.search_knn_secuencial import return_images
-
+import itertools
+import time
+from sklearn.decomposition import PCA
 current_dir = os.path.dirname(os.path.abspath(__file__))
 dir_dataset = os.path.join(current_dir, "dataset", "images_local1")
 dir_input = os.path.join(current_dir, "input")
 
+def build_rtree_index(data):
+    #print(data)
+    p = index.Property()
+    p.dimension = 128
+    
+    idx = index.Index(properties=p)
+    for name, characteristic in data.items():
+        for i, vector in enumerate(characteristic , start=1):
+            
+            idx.insert(i, tuple(vector) , obj=(name, i))
+    return idx
 
-def crear_indice(dataset):
-    idx = index.Index()    
-    for name, characteristic in dataset.items():
-        for i, caracteristicas in enumerate(characteristic , start=1):
-            xmin = ymin = xmax = ymax = i  # Establece las coordenadas de la ventana como el índice actual
-            idx.insert(i, (xmin, ymin, xmax, ymax), obj=(name, i, caracteristicas))    
+
+def build_rtree_index_PCA(data):
+    #print(data)
+    p = index.Property()
+    p.dimension = 128
+    
+    idx = index.Index(properties=p)
+    for name, characteristic in data.items():
+        for i, vector in enumerate(characteristic , start=1):
+            data_pca = convert_PCA(vector)
+            idx.insert(i, data_pca , obj=(name, i))
     return idx
 
 def buscar_indice(idx, query):
@@ -20,7 +38,7 @@ def buscar_indice(idx, query):
     k_elementos_cercanos = []
     
     for resultado in resultados:
-        name, index_image, caracteristicas = resultado.object
+        name, index_image = resultado.object
         index_str = str(index_image).zfill(4)  
         
         k_elementos_cercanos.append((name, index_str))
@@ -32,24 +50,45 @@ def buscar_knn_rtree(idx, query, k):
     k_elementos_cercanos = []
     
     for resultado in resultados:
-        name, index_image, caracteristicas = resultado.object
+        name, index_image = resultado.object
         index_str = str(index_image).zfill(4)  
         
         k_elementos_cercanos.append((name, index_str))
     
     return k_elementos_cercanos
 
+def convert_PCA(vector):
+    vector = tuple(vector)
+    pca = PCA(n_components=2)
+    data_pca = pca.fit_transform(vector)
+    return data_pca
+# MIO
+def search_rtree_indexed_all(query, data):
+    print("search_rtree_indexed_all ")
+    idx = build_rtree_index(data)
+    
+    print("TOTAL CONSTRUIDOS: " , len(idx))
+    start_time = time.time() 
+    resultados = buscar_indice(idx , query)
+    execution_time = time.time() - start_time  
+    return execution_time, return_images(resultados)
 
-def search_rtree_indexed_all(query, data, radio):
-    idx = crear_indice(data)
-    coordenadas = (query[0] - radio, query[1] - radio, query[0] + radio, query[1] + radio)
-    resultados = buscar_indice(idx, coordenadas)
-    return return_images(resultados)
+def search_rtree_indexed_knn(query, data, k):
+    print("search_rtree_indexed_knn ")
+    idx = build_rtree_index(data)
+    print("TOTAL CONSTRUIDOS: " , len(idx))
+    
+    start_time = time.time() 
+    resultados = buscar_knn_rtree(idx , query, k)
+    execution_time = time.time() - start_time  
+    return execution_time, return_images(resultados)
 
-def search_rtree_indexed_knn(query, data, radio, k):
-    idx = crear_indice(data)
-    coordenadas = (query[0] - radio, query[1] - radio, query[0] + radio, query[1] + radio)
-    resultados = buscar_knn_rtree(idx, coordenadas, k)
-    return return_images(resultados)
-
-
+def search_rtree_indexed_knn_hight(query, data, k):
+    print("search_rtree_indexed_knn ")
+    idx = build_rtree_index_PCA(data)
+    print("TOTAL CONSTRUIDOS: " , len(idx))
+    new_query = convert_PCA(query)
+    start_time = time.time() 
+    resultados = buscar_knn_rtree(idx , new_query, k)
+    execution_time = time.time() - start_time  
+    return execution_time, return_images(resultados)
